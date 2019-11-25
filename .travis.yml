@@ -6,6 +6,7 @@ compiler:
 os:
   - linux
 install:
+  - chmod +x build.sh
   - sudo apt-get install cmake
 env:
   - BUILD_TYPE=debug
