@@ -7,4 +7,9 @@ os:
   - linux
 install:
   - sudo apt-get install cmake
+env:
+  - BUILD_TYPE=debug
+  - BUILD_TYPE=release
+script:
+  - ./build.sh
 
