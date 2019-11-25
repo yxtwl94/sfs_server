@@ -1,0 +1,17 @@
+language: cpp
+sudo: required
+
+compiler:
+  - g++
+os:
+  - linux
+before_install:
+  - chmod +x build.sh
+install:
+  - sudo apt-get install cmake
+env:
+  - BUILD_TYPE=debug
+  - BUILD_TYPE=release
+script:
+  - ./build.sh
+
