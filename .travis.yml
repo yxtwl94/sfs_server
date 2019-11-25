@@ -1,0 +1,10 @@
+language: cpp
+sudo: required
+
+compiler:
+  - g++
+os:
+  - linux
+install:
+  - sudo apt-get install cmake
+

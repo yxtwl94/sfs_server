@@ -19,7 +19,7 @@ bio::server::server(int port):
                 listen_fd_(0),
                 conn_fd_(0) {
 
-    if(port<0 || port>65535) {
+    if(port<1024 || port>65535) {
         fprintf(stderr,"port: %d isn't correct!\n", port);
         return;
     }
@@ -92,8 +92,10 @@ void bio::server::handler(int arg) {
         char buff[MAX_BUFF]=""; // 接收缓冲区,必须每次初始化!
         int byte=recv(conn_fd, buff, sizeof(buff), 0);
 
+
         if(byte>0){
-            if(strncmp(buff, "exit",4) == 0) break; //只比较前4个,输入字符进入缓冲区后貌似会多两个
+            buff[byte]='\0';
+            if(strncmp(buff, "exit",4) == 0) break; //只比较前4个,输入字符进入缓冲区后貌多两个\r \n
 
             printf("[%d]received buf is %s",conn_fd,buff);
             send(conn_fd,buff,sizeof(buff),0); //反馈给客户端
