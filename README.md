@@ -3,6 +3,9 @@
 A C++ server project which used to study,contains most IO modells(BIO NIO reactor etc...)
 sfs means stupid for study
 
+* 开发平台：x86-64 Linux 18.04 LTS
+* 开发语言：C++ 11
+
 ## BIO modell
 
 blocking i/o modell use TCP/IP
