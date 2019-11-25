@@ -5,8 +5,9 @@ compiler:
   - g++
 os:
   - linux
-install:
+before_install:
   - chmod +x build.sh
+install:
   - sudo apt-get install cmake
 env:
   - BUILD_TYPE=debug
