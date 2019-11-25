@@ -1,9 +1,14 @@
 #!/bin/sh
 
-set -x # 执行指令后，会先显示该指令及所下的参数。
+set -x
 
-BUILD_DIR=${BUILD_DIR:-../sfs_server/build}
+SOURCE_DIR=`pwd`
+BUILD_DIR=${BUILD_DIR:-../build}
+BUILD_TYPE=${BUILD_TYPE:-Debug}
 
-mkdir $BUILD_DIR \
-    && cd build \
-    && cmake ..
+mkdir -p $BUILD_DIR/$BUILD_TYPE \
+    && cd $BUILD_DIR/$BUILD_TYPE \
+    && cmake \
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+            $SOURCE_DIR \
+    && make $*
