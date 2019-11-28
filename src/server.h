@@ -13,13 +13,14 @@ namespace bio {
     class server {
 
     public:
-
-        explicit server(int port);
+        void setThreadPoolN(size_t n);
+        explicit server(int port); //防止隐式转换,类的转换必须显式
         void start();
         static void handler(int arg);
         ~server();
 
     private:
+        size_t threadPoolNum_;
         int port_;
         int listen_fd_;
         int conn_fd_;
