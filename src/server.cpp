@@ -10,6 +10,7 @@
 
 #include "src/ThreadPool.h"
 #include "src/server.h"
+#include "src/ringBuffer.h"
 
 #define MAX_BUFF 2048
 
@@ -118,26 +119,17 @@ void bio::server::start() {
 void bio::server::handler(int arg) {
 
     int conn_fd = arg;
-    char greet[]="Hello! I'm a stupid server,use 'exit' to get out\n";
-    send(conn_fd,greet,sizeof(greet),0); //greeting
+    char greet[]="Hello! I'm a stupid server\n";
+    send(conn_fd,greet,sizeof greet,0); //greeting
 
-    // 从client fd接收数据，写入recv_buf里
+    ringBuffer buffer;
+    // 从client fd接收数据，写入
     while (true) {
-        char buff[MAX_BUFF]=""; // 接收缓冲区,必须每次初始化!
-        int byte=recv(conn_fd, buff, sizeof(buff), 0);
-
-
+        ssize_t byte=buffer.readFd(conn_fd);
         if(byte>0){
-            buff[byte]='\0';
-            if(strncmp(buff, "exit",4) == 0) break; //只比较前4个,输入字符进入缓冲区后貌多两个\r \n
-
-            printf("[%d]received buf is %s",conn_fd,buff);
-            send(conn_fd,buff,sizeof(buff),0); //反馈给客户端
+            printf("received something\n");
         }
-        else if(byte==0) break; //网络中断返回0
-        else{
-            perror("receive error");
-        }
+        else if(byte<0) break; //出错返回－１
     }
     printf("\nclient[conn_fd:%d] closed!\n", conn_fd);
     close(conn_fd);	//关闭已连接套接字
