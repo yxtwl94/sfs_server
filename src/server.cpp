@@ -4,15 +4,11 @@
 #include <iostream>
 #include <zconf.h>
 #include <arpa/inet.h>
-#include <thread>
 #include <strings.h>
-#include <cstring>
 
 #include "src/ThreadPool.h"
 #include "src/server.h"
 #include "src/ringBuffer.h"
-
-#define MAX_BUFF 2048
 
 bio::server::server(int port):
                 threadPoolNum_(0),
@@ -125,11 +121,17 @@ void bio::server::handler(int arg) {
     ringBuffer buffer;
     // 从client fd接收数据，写入
     while (true) {
-        ssize_t byte=buffer.readFd(conn_fd);
+        ssize_t byte=buffer.readFromFd(conn_fd);
         if(byte>0){
-            printf("received something\n");
+            std::string buf=buffer.readBuffer();
+
+            printf("[%d]received ",conn_fd);
+            std::cout<<buf<<std::endl;
         }
-        else if(byte<0) break; //出错返回－１
+        else if(byte==0) break;
+        else{                      //出错返回－１
+            perror("receive error");
+        }
     }
     printf("\nclient[conn_fd:%d] closed!\n", conn_fd);
     close(conn_fd);	//关闭已连接套接字

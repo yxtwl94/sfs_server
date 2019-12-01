@@ -3,40 +3,42 @@
 //
 #include <sys/uio.h>
 #include <cassert>
-#include<boost/implicit_cast.hpp>
+#include <sys/socket.h>
 
 #include "ringBuffer.h"
 
 
-ringBuffer::ringBuffer(size_t initialSize):
-                buf_(initialSize),
-                readIndex_(0),
-                writeIndex_(1){
-
-    assert(initialSize>=2);
+ringBuffer::ringBuffer() {
     assert(readableBytes() == 0);
-    assert(writableBytes()==initialSize-2);
 }
 
-ssize_t ringBuffer::readFd(int fd) {
+ssize_t ringBuffer::readFromFd(int fd) {
 
-    struct iovec vec[2];
-    const size_t writeBytes = writableBytes();
+//    struct iovec iov[1];
+//    iov[0].iov_base=&buf_.front();
+//    iov[0].iov_len=initSize;
+//    const ssize_t n=readv(fd,iov,1);
 
-    vec[0].iov_base = begin()+writeIndex_;
-    vec[0].iov_len = writeBytes;
+    char buff[initSize]="";
+    const ssize_t n=recv(fd, buff, sizeof buff, 0);
 
-    const ssize_t n=readv(fd,vec,1);
-
-    if(n<0){
-        perror("read false");
+    if(n>0){
+        int i=0;
+        while(true){
+            if(buff[i]=='\n') break;  //以换行为结束位
+            else buf_.push(buff[i]);
+            i++;
+        }
     }
-    else if (boost::implicit_cast<size_t>(n) <= writeBytes) {  //隐式转换　ssize_t->size_t,当空闲write空间足够时
-        writeIndex_ += n;
-    }
-    else {
-        writeIndex_ = buf_.size();    //当剩余空间不够时 加满
-    }
-
     return n;
+}
+
+std::string ringBuffer::readBuffer() {
+
+    std::string temp;
+    while(readableBytes()){
+        temp+=buf_.front();
+        buf_.pop();
+    }
+    return temp;
 }
