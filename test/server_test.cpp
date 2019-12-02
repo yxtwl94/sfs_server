@@ -2,14 +2,36 @@
 // Created by yxt on 22.11.19.
 //
 #include <iostream>
+#include <getopt.h>
+
 #include "src/server.h"
 
-int main(){
+int main(int argc, char *argv[]) {
 
-    std::cout<<"I'm testing"<<std::endl;
-    bio::server server(8000);
+    int threadNum=100; //default
+    int port=8000;
 
-    server.setThreadPoolN(100);
+    int opt;
+    const char *str = "t:p:";
+    while ((opt = getopt(argc, argv, str)) != -1) {
+
+        switch(opt){
+
+            case 'p':{
+                port=atoi(optarg);
+                break;
+            }
+            case 't':{
+                threadNum=atoi(optarg);
+                break;
+            }
+            default: break;
+        }
+    }
+    bio::server server(port);
+    printf("Testing Server with port %d\n",port);
+
+    server.setThreadPoolN(threadNum);
     server.start();
 
 

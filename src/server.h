@@ -20,7 +20,7 @@ namespace bio {
         ~server();
 
     private:
-        size_t threadPoolNum_;
+        size_t threadNum_;
         int port_;
         int listen_fd_;
         int conn_fd_;

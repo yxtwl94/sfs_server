@@ -11,7 +11,7 @@
 #include "src/ringBuffer.h"
 
 bio::server::server(int port):
-                threadPoolNum_(0),
+                threadNum_(0),
                 port_(port),
                 server_addr_(),
                 client_addr_(),
@@ -22,9 +22,6 @@ bio::server::server(int port):
         fprintf(stderr,"port: %d isn't correct!\n", port);
         return;
     }
-    const char *test_eth = "eth0";
-
-    printf("Server Started with port %d!\n", port);
     bzero((char *)&server_addr_, sizeof(server_addr_)); //数据初始化--清零
 
     server_addr_.sin_family=AF_INET;
@@ -39,17 +36,17 @@ void bio::server::setThreadPoolN(size_t n) {
         fprintf(stderr,"number of threads in pool must be positive");
         return;
     }
-    threadPoolNum_=n;
+    threadNum_=n;
 
 }
 
 void bio::server::start() {
     //建立线程池
-    if(threadPoolNum_<=0){
+    if(threadNum_<=0){
         fprintf(stderr,"you must set number of threads in ThreadPool");
         return;
     }
-    ThreadPool threadPool(threadPoolNum_);
+    ThreadPool threadPool(threadNum_);
 
     /*创建服务器端套接字--IPv4协议，面向连接通信，TCP协议*/
     if((listen_fd_=socket(AF_INET,SOCK_STREAM,0))<0) {
@@ -82,6 +79,7 @@ void bio::server::start() {
         close(listen_fd_);
         return;
     }
+    printf("Server Started with fd %d!\n",listen_fd_);
 
     printf("======waiting for client's request======\n");
 
@@ -124,17 +122,13 @@ void bio::server::handler(int arg) {
         ssize_t byte=buffer.readFromFd(conn_fd);
         if(byte>0){
             std::string buf=buffer.readBuffer();
-
-            printf("[%d]received ",conn_fd);
+            printf("[%d]received ",conn_fd);  //不加'\n'无法输出，呵呵
             std::cout<<buf<<std::endl;
         }
-        else if(byte==0) break;
-        else{                      //出错返回－１
-            perror("receive error");
-        }
+        else break;
     }
     printf("\nclient[conn_fd:%d] closed!\n", conn_fd);
-    close(conn_fd);	//关闭已连接套接字
+    close(conn_fd);	 //关闭已连接套接字
 
 }
 
