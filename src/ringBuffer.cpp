@@ -61,7 +61,7 @@ std::string ringBuffer::readBuffer() {
 
     std::string temp;
     for(size_t i=readIndex_+1;;++i){
-        if(i==buf_.size()) i=0;  //加完１之后越界返回
+        if(i==buf_.size()) i=0;  //加完1之后越界返回
         if(i==writeIndex_+1) break;
 
         if(buf_[i]=='\n'){
