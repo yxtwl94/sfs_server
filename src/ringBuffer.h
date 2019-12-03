@@ -10,7 +10,7 @@
  * ＋－－－－－－－－－＋－－－－－－－－－＋－－－－－－－－－＋
  * ｜　　　　　　　　　｜　　　　　　　　　｜　　　　　　　　　｜
  * ｜　　　　　　　　　｜　　　　　　　　　｜　　　　　　　　　｜
- * ｜writableBytesL　　readableBytes  writableBytesR｜
+ * ｜writableBytesL　　  readableBytes      writableBytesR｜
  * ｜　　　　　　　　　｜　　　　　　　　　｜　　　　　　　　　｜
  * ｜　　　　　　　　　｜　　　　　　　　　｜　　　　　　　　　｜
  * ＋－－－－－－－－－＋－－－－＞＞－－－＋－－－－－－－－－＋
@@ -22,9 +22,9 @@
  * ＋－－－－－－－－－＋－－－－－－－－－＋－－－－－－－－－＋
  * ｜　　　　　　　　　｜　　　　　　　　　｜　　　　　　　　　｜
  * ｜　　　　　　　　　｜　　　　　　　　　｜　　　　　　　　　｜
- * ｜readableBytes　　writableBytesR  readableBytes ｜
+ * ｜readableBytes　　  writableBytesR      readableBytes ｜
  * ｜　　　　　　　　　｜　　　　　　　　　｜　　　　　　　　　｜
- * ＋－－－＞＞－－－－＋－－－－－－－－－＋＞－－－＞＞－－－＋
+ * ＋－－－＞＞－－－－＋－－－－－－－－－＋－－－－＞＞－－－＋
  * 0           writeIndex       readIndex         size
  *
  * writableBytesL disappears
