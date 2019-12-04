@@ -1,7 +1,7 @@
 # A Stupid for Study Server
 
 
-[![Build Status](https://travis-ci.org/yxtwl94/sfs_server.svg?branch=master)](https://github.com/yxtwl94/sfs_server)
+[![Build Status](https://travis-ci.org/yxtwl94/sfs_server)](https://github.com/yxtwl94/sfs_server)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 
 A C++ server project which used to study,contains most IO modells(BIO NIO reactor etc...)
