@@ -4,4 +4,4 @@
 
 #include "Channel.h"
 
-nio::Channel::Channel(EventLoop* loop,int fd):{}
+nio::Channel::Channel(EventLoop* loop,int fd){}

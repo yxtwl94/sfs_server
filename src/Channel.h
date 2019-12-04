@@ -17,9 +17,7 @@ class Channel {
 public:
     Channel(EventLoop *loop, int fd);
 
-    Ｃhannel(EventLoop* loop,int fd);
-
-    ~Channel()
+    ~Channel();
 
 
 private:
