@@ -7,9 +7,10 @@ find_package(Threads REQUIRED)
 include_directories(.)
 
 add_library(${PROJECT_NAME}
-            src/server.cpp
-            src/ringBuffer.cpp
-           )
+        src/Server.cpp
+        src/RingBuffer.cpp
+        src/Channel.cpp )
+
 link_libraries(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 

@@ -7,10 +7,10 @@
 #include <strings.h>
 
 #include "src/ThreadPool.h"
-#include "src/server.h"
-#include "src/ringBuffer.h"
+#include "src/Server.h"
+#include "src/RingBuffer.h"
 
-bio::server::server(int port):
+nio::Server::Server(int port):
                 threadNum_(0),
                 port_(port),
                 server_addr_(),
@@ -31,7 +31,7 @@ bio::server::server(int port):
 }
 
 
-void bio::server::setThreadPoolN(size_t n) {
+void nio::Server::setThreadPoolN(size_t n) {
     if(n<=0){
         fprintf(stderr,"number of threads in pool must be positive");
         return;
@@ -40,7 +40,7 @@ void bio::server::setThreadPoolN(size_t n) {
 
 }
 
-void bio::server::start() {
+void nio::Server::start() {
     //建立线程池
     if(threadNum_<=0){
         fprintf(stderr,"you must set number of threads in ThreadPool");
@@ -103,23 +103,23 @@ void bio::server::start() {
 
         if(conn_fd_ > 0) {
 
-            threadPool.enqueue(bio::server::handler,conn_fd_);
+            threadPool.enqueue(nio::Server::handler, conn_fd_);
             //std::thread serverThread(handler,conn_fd_);
             //serverThread.detach(); //不用等线程,直接返回处理下一个连接
         }
     }
 }
 
-void bio::server::handler(int arg) {
+void nio::Server::handler(int arg) {
 
     int conn_fd = arg;
-    char greet[]="Hello! I'm a stupid server\n";
+    char greet[]="Hello! I'm a stupid Server\n";
     send(conn_fd,greet,sizeof greet,0); //greeting
 
-    ringBuffer buffer;
+    RingBuffer buffer;
     // 从client fd接收数据，写入
     while (true) {
-        ssize_t byte=buffer.readFromFd(conn_fd);
+        ssize_t byte = buffer.readFromFd(conn_fd);
         if(byte>0){
             std::string buf=buffer.readBuffer();
             printf("[%d]received ",conn_fd);  //不加'\n'无法输出，呵呵
@@ -132,7 +132,7 @@ void bio::server::handler(int arg) {
 
 }
 
-bio::server::~server() {
+nio::Server::~Server() {
     close(listen_fd_);
-    std::cout<<"server stopped"<<std::endl;
+    std::cout<<"Server stopped"<<std::endl;
 }

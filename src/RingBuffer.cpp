@@ -4,10 +4,10 @@
 #include <sys/uio.h>
 #include <cassert>
 #include <boost/implicit_cast.hpp>
-#include "ringBuffer.h"
+#include "RingBuffer.h"
 
 
-ringBuffer::ringBuffer(size_t initialSize):
+RingBuffer::RingBuffer(size_t initialSize):
                 buf_(initialSize),
                 readIndex_(0),
                 writeIndex_(0) {
@@ -18,7 +18,7 @@ ringBuffer::ringBuffer(size_t initialSize):
     assert(writableBytesL()==1);
 }
 
-ssize_t ringBuffer::readFromFd(int fd) {
+ssize_t RingBuffer::readFromFd(int fd) {
 
     struct iovec iov[2];
     const size_t writeBytesR = writableBytesR();
@@ -57,7 +57,7 @@ ssize_t ringBuffer::readFromFd(int fd) {
     return n;
 }
 
-std::string ringBuffer::readBuffer() {
+std::string RingBuffer::readBuffer() {
 
     std::string temp;
     for(size_t i=readIndex_+1;;++i){

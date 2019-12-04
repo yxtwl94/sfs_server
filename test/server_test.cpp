@@ -4,7 +4,7 @@
 #include <iostream>
 #include <getopt.h>
 
-#include "src/server.h"
+#include "src/Server.h"
 
 int main(int argc, char *argv[]) {
 
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
             default: break;
         }
     }
-    bio::server server(port);
+    nio::Server server(port);
     printf("Testing Server with port %d\n",port);
 
     server.setThreadPoolN(threadNum);

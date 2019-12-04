@@ -41,11 +41,11 @@
 #include <algorithm>
 #include <vector>
 
-class ringBuffer {
+class RingBuffer {
 
 public:
     static const size_t initSize = 1024;
-    explicit ringBuffer(size_t initialSize = initSize);
+    explicit RingBuffer(size_t initialSize = initSize);
 
     size_t readableBytes() const {
         if(writeIndex_==readIndex_ && buf_[readIndex_]=='\0') return 0;

@@ -8,16 +8,16 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-namespace bio {
+namespace nio {
 
-    class server {
+    class Server {
 
     public:
         void setThreadPoolN(size_t n);
-        explicit server(int port); //防止隐式转换,类的转换必须显式
+        explicit Server(int port); //防止隐式转换,类的转换必须显式
         void start();
         static void handler(int arg);
-        ~server();
+        ~Server();
 
     private:
         size_t threadNum_;
