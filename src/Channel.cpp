@@ -2,74 +2,48 @@
 // Created by yxtwl94 on 03.12.19.
 //
 
+#include <sys/eventfd.h>
+#include <cassert>
+
 #include "Channel.h"
 
-nio::Channel::Channel(EventLoop* loop,int fd):
+nio::Channel::Channel(EventLoop* loop):
                             loop_(loop),
                             fd_(0),
-                            events_(0),
-                            revents_(0),
-                            lastEvents_(0){
+                            event_(0),
+                            revent_(0),
+                            lastEvent_(0){
 
-
-}
-
-void nio::Channel::setFd(int fd) { fd_=fd; }
-
-int nio::Channel::getFd() { return fd_; }
-
-void nio::Channel::setEvents(__uint32_t event) {
-    events_=event;
-}
-void nio::Channel::setRevents(__uint32_t event) {
-    revents_=event;
+    fd_=eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    assert(fd_>0);
 }
 
 void nio::Channel::handelEvents() {
-    events_=0;
-    if((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)){
+    event_=0;
+
+    //文件被挂断,!文件可读
+    if((revent_ & EPOLLHUP) && !(revent_ & EPOLLIN)){
         return;
     }
-
-    if (revents_ & EPOLLERR) {
+    //文件上发上了一个错误
+    if (revent_ & EPOLLERR) {
         return;
     }
-
-    if (revents_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {
-        handleRead();
+    //文件可读,文件有紧急数据可读,对端关闭连接或者shutdown写入半连接
+    if (revent_ & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) {
+        if(readHandler_) readHandler_();
     }
-    if (revents_ & EPOLLOUT) {
-        handleWrite();
+    //文件可写
+    if (revent_ & EPOLLOUT) {
+        if(writeHandler_) writeHandler_();
     }
-    handleConn();
+
 }
 
-void nio::Channel::handleRead() {
-    if(readHandler_)
-        readHandler_();
-}
 
-void nio::Channel::handleWrite() {
-    if(writeHandler_)
-        writeHandler_();
-}
+void nio::Channel::setReadHandler(CallBack &&readHandler) { readHandler_ = readHandler; }
 
-void nio::Channel::handleConn() {
-    if(connHandler_)
-        connHandler_();
-}
-
-void nio::Channel::setReadHandler(CallBack &&readHandler) {
-    readHandler_ = readHandler;
-}
-
-void nio::Channel::setWriteHandler(CallBack &&writeHandler) {
-    writeHandler_=writeHandler;
-}
-
-void nio::Channel::setConnHandler(CallBack &&connHandler) {
-    connHandler_=connHandler;
-}
+void nio::Channel::setWriteHandler(CallBack &&writeHandler) { writeHandler_=writeHandler; }
 
 
 nio::Channel::~Channel() = default;

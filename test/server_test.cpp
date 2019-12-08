@@ -5,6 +5,7 @@
 #include <getopt.h>
 
 #include "src/Server.h"
+#include "src/EventLoop.h"
 
 int main(int argc, char *argv[]) {
 
@@ -31,6 +32,7 @@ int main(int argc, char *argv[]) {
     nio::Server server(port);
     printf("Testing Server with port %d\n",port);
 
+    nio::EventLoop a;
     server.setThreadPoolN(threadNum);
     server.start();
 

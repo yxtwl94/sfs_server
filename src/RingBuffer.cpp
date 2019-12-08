@@ -8,9 +8,9 @@
 
 
 RingBuffer::RingBuffer(size_t initialSize):
-                buf_(initialSize),
-                readIndex_(0),
-                writeIndex_(0) {
+                            buf_(initialSize),
+                            readIndex_(0),
+                            writeIndex_(0) {
 
     assert(initialSize>=2);
     assert(readableBytes() == 0);

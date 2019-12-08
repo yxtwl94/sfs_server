@@ -9,7 +9,9 @@ include_directories(.)
 add_library(${PROJECT_NAME}
         src/Server.cpp
         src/RingBuffer.cpp
-        src/Channel.cpp )
+        src/Channel.cpp
+        src/EventLoop.cpp
+        src/Epoll.cpp)
 
 link_libraries(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} Threads::Threads)

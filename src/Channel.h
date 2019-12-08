@@ -6,51 +6,55 @@
 #define SFS_SERVER_CHANNEL_H
 
 #include <sys/epoll.h>
+#include <memory>
 #include <functional>
 
 namespace nio {
 
-class EventLoop;
+    class EventLoop;
 
-class Channel {
+    class Channel {
 
-public:
-    typedef std::function<void()> CallBack;
+    public:
+        typedef std::function<void()> CallBack;
 
-    Channel(EventLoop *loop, int fd);
+        explicit Channel(EventLoop *loop);
 
-    int getFd();
-    void setFd(int fd);
+        int getFd() { return fd_; };
 
-    void setEvents(__uint32_t event);
-    void setRevents(__uint32_t event);
-    void handelEvents();
+        void setFd(int fd) { fd_ = fd; };
 
-    void setReadHandler(CallBack &&readHandler);
-    void setWriteHandler(CallBack &&writeHandler);
-    void setConnHandler(CallBack &&connHandler);
+        void setEvent(__uint32_t event) { event_ = event; };
 
-    void handleRead();
-    void handleWrite();
-    void handleConn();
+        void setRevent(__uint32_t event) { revent_ = event; };
 
-    ~Channel();
+        __uint32_t getEvent() { return event_; }
+
+        __uint32_t getLastEvents() { return lastEvent_; }
+
+        void handelEvents();
+
+        void setReadHandler(CallBack &&readHandler);
+
+        void setWriteHandler(CallBack &&writeHandler);
+
+        void updateLastEvents() { lastEvent_ = event_; }
+
+        ~Channel();
 
 
-private:
+    private:
 
-    EventLoop *loop_;
-    int fd_;
+        EventLoop *loop_;
+        int fd_;
 
-    __uint32_t events_;
-    __uint32_t revents_;
-    __uint32_t lastEvents_;
+        __uint32_t event_;
+        __uint32_t revent_;
+        __uint32_t lastEvent_;
 
-    CallBack readHandler_;
-    CallBack writeHandler_;
-    CallBack connHandler_;
-};
-
+        CallBack readHandler_;
+        CallBack writeHandler_;
+    };
 
 }
 
