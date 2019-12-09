@@ -11,6 +11,8 @@
 #include "src/RingBuffer.h"
 
 nio::Server::Server(int port):
+                serverLoop_(new nio::EventLoop()),
+                serverChannel_(new nio::Channel(serverLoop_)),
                 threadNum_(0),
                 port_(port),
                 server_addr_(),
@@ -79,11 +81,20 @@ void nio::Server::start() {
         close(listen_fd_);
         return;
     }
+
+    //-------------------------------------------------------------------------------//
     printf("Server Started with fd %d!\n",listen_fd_);
 
     printf("======waiting for client's request======\n");
 
-    while(true) {
+    serverChannel_->setEvent(EPOLLIN | EPOLLET);
+    serverChannel_->setFd(listen_fd_);
+
+    serverLoop_->addToPoller(serverChannel_);
+    serverLoop_->loop();
+
+    /*
+    for (;;) {
         char client_ip[INET_ADDRSTRLEN]=""; //客户端ip,最长16
         socklen_t cliAddrLen = sizeof(client_addr_);   // 必须初始化! 是16
 
@@ -103,11 +114,12 @@ void nio::Server::start() {
 
         if(conn_fd_ > 0) {
 
-            threadPool.enqueue(nio::Server::handler, conn_fd_);
+            threadPool.enqueue(std::bind(&Server::handler,conn_fd_));
             //std::thread serverThread(handler,conn_fd_);
             //serverThread.detach(); //不用等线程,直接返回处理下一个连接
         }
     }
+     */
 }
 
 void nio::Server::handler(int arg) {

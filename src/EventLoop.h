@@ -9,13 +9,13 @@
 #include <memory>
 
 #include "Channel.h"
-#include "Epoll.h"
+#include "Poller.h"
 
 
 namespace nio {
 
     class Channel;
-    class Epoll;
+    class Poller;
 
     class EventLoop {
 
@@ -23,14 +23,19 @@ namespace nio {
         EventLoop();
         ~EventLoop();
 
-        void handleRead();
+        void handleRead(int fd);
+        void handleWrite(int fd);
+
+        void addToPoller(const nio::Channel::ChannelPtr& channel) {
+            poller_->epollAdd(channel);
+        }
 
         void loop();
 
     private:
         bool looping_;
-
-        std::unique_ptr<nio::Epoll> poller_;  //ChannelPtr poller
+        bool quit_;
+        std::unique_ptr<nio::Poller> poller_;  //ChannelPtr poller
         std::shared_ptr<nio::Channel> thisChannel_;
     };
 

@@ -8,6 +8,7 @@
 #include <sys/epoll.h>
 #include <memory>
 #include <functional>
+#include <vector>
 
 namespace nio {
 
@@ -16,7 +17,8 @@ namespace nio {
     class Channel {
 
     public:
-        typedef std::function<void()> CallBack;
+        typedef std::shared_ptr<nio::Channel> ChannelPtr;
+        typedef std::vector<ChannelPtr> ChannelList; //事件指针数组类型
 
         explicit Channel(EventLoop *loop);
 
@@ -26,34 +28,17 @@ namespace nio {
 
         void setEvent(__uint32_t event) { event_ = event; };
 
-        void setRevent(__uint32_t event) { revent_ = event; };
-
         __uint32_t getEvent() { return event_; }
 
-        __uint32_t getLastEvents() { return lastEvent_; }
-
-        void handelEvents();
-
-        void setReadHandler(CallBack &&readHandler);
-
-        void setWriteHandler(CallBack &&writeHandler);
-
-        void updateLastEvents() { lastEvent_ = event_; }
 
         ~Channel();
 
 
     private:
-
-        EventLoop *loop_;
         int fd_;
-
+        EventLoop *loop_;
         __uint32_t event_;
-        __uint32_t revent_;
-        __uint32_t lastEvent_;
 
-        CallBack readHandler_;
-        CallBack writeHandler_;
     };
 
 }

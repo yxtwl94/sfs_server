@@ -8,6 +8,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "src/EventLoop.h"
+#include "src/Channel.h"
+
 namespace nio {
 
     class Server {
@@ -16,10 +19,13 @@ namespace nio {
         void setThreadPoolN(size_t n);
         explicit Server(int port); //防止隐式转换,类的转换必须显式
         void start();
+
         static void handler(int arg);
         ~Server();
 
     private:
+        EventLoop* serverLoop_;
+        nio::Channel::ChannelPtr serverChannel_;
         size_t threadNum_;
         int port_;
         int listen_fd_;
