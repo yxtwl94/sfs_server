@@ -20,7 +20,7 @@ namespace nio {
         typedef std::shared_ptr<nio::Channel> ChannelPtr;
         typedef std::vector<ChannelPtr> ChannelList; //事件指针数组类型
 
-        explicit Channel(EventLoop *loop);
+        Channel();
 
         int getFd() { return fd_; };
 
@@ -30,13 +30,11 @@ namespace nio {
 
         __uint32_t getEvent() { return event_; }
 
-
         ~Channel();
 
 
     private:
         int fd_;
-        EventLoop *loop_;
         __uint32_t event_;
 
     };

@@ -19,7 +19,6 @@ namespace nio{
         //typedef std::shared_ptr<nio::Channel> ChannelPtr;
         //typedef std::vector<ChannelPtr> ChannelList; //事件指针数组类型
 
-
         Poller();
         ~Poller();
 

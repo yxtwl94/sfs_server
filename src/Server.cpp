@@ -12,7 +12,7 @@
 
 nio::Server::Server(int port):
                 serverLoop_(new nio::EventLoop()),
-                serverChannel_(new nio::Channel(serverLoop_)),
+                serverChannel_(new nio::Channel()),
                 threadNum_(0),
                 port_(port),
                 server_addr_(),
@@ -91,7 +91,7 @@ void nio::Server::start() {
     serverChannel_->setFd(listen_fd_);
 
     serverLoop_->addToPoller(serverChannel_);
-    serverLoop_->loop();
+    serverLoop_->loop(listen_fd_);
 
     /*
     for (;;) {
@@ -120,28 +120,6 @@ void nio::Server::start() {
         }
     }
      */
-}
-
-void nio::Server::handler(int arg) {
-
-    int conn_fd = arg;
-    char greet[]="Hello! I'm a stupid Server\n";
-    send(conn_fd,greet,sizeof greet,0); //greeting
-
-    RingBuffer buffer;
-    // 从client fd接收数据，写入
-    while (true) {
-        ssize_t byte = buffer.readFromFd(conn_fd);
-        if(byte>0){
-            std::string buf=buffer.readBuffer();
-            printf("[%d]received ",conn_fd);  //不加'\n'无法输出，呵呵
-            std::cout<<buf<<std::endl;
-        }
-        else break;
-    }
-    printf("\nclient[conn_fd:%d] closed!\n", conn_fd);
-    close(conn_fd);	 //关闭已连接套接字
-
 }
 
 nio::Server::~Server() {
