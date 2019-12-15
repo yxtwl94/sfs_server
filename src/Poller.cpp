@@ -28,6 +28,7 @@ void nio::Poller::epollAdd(const nio::Channel::ChannelPtr& channel) {
     channelMap_[fd]=channel;
 
     if (epoll_ctl(epollFd_, EPOLL_CTL_ADD, fd, &event) < 0) {
+        channelMap_[fd].reset(); //计数减１
         perror("ERROR: epoll add");
     }
 }
@@ -43,6 +44,7 @@ void nio::Poller::epollDel(const nio::Channel::ChannelPtr &channel) {
     if (epoll_ctl(epollFd_, EPOLL_CTL_DEL, fd, &event) < 0) {
         perror("ERROR: epoll delete");
     }
+    channelMap_[fd].reset(); //计数减１
 }
 
 

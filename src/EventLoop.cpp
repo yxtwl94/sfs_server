@@ -43,15 +43,15 @@ void nio::EventLoop::handleConn(int fd) {
     send(conn_fd,greet,sizeof greet,0); //greeting
 
     //add new connection Channel to Poller
-    nio::Channel::ChannelPtr connChanel(new nio::Channel());
-    connChanel->setFd(conn_fd);
-    connChanel->setEvent(EPOLLIN | EPOLLET);
-    poller_->epollAdd(connChanel);
+    nio::Channel::ChannelPtr curChannel(new nio::Channel());
+    curChannel->setFd(conn_fd);
+    curChannel->setEvent(EPOLLIN | EPOLLET);
+    poller_->epollAdd(curChannel);
 
     // 打印客户端的 ip 和端口
     inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
     printf("--------------------------------------\n");
-    printf("new client ip=%s,port=%d\n", client_ip,ntohs(client_addr.sin_port));
+    printf("new client ip=%s,port=%d,Fd=%d\n", client_ip,ntohs(client_addr.sin_port),conn_fd);
     printf("--------------------------------------\n");
 
 }
@@ -67,7 +67,15 @@ void nio::EventLoop::handleRead(int fd) {
         printf("[%d]received ", fd);  //不加'\n'无法输出，呵呵
         std::cout << buf << std::endl;
     }
+    else if(byte==0){
+        //epoll del
+        nio::Channel::ChannelPtr curChannel(new nio::Channel());
+        curChannel->setFd(fd);
+        poller_->epollDel(curChannel);
 
+        printf("\nclient[conn_fd:%d] closed!\n", fd);
+        close(fd);	//关闭已连接套接字
+    }
 }
 
 void nio::EventLoop::handleWrite(int fd) {
@@ -87,8 +95,7 @@ void nio::EventLoop::loop(int serverFd) {
         list = poller_->poll();
 
         for (auto& it : list) {
-
-            int curFd=it->getFd();
+            int fd=it->getFd();
             __uint32_t event=it->getEvent();
 
             if((event & EPOLLHUP) && !(event & EPOLLIN)){
@@ -98,13 +105,13 @@ void nio::EventLoop::loop(int serverFd) {
                 return;
             }
             if (event & (EPOLLIN | EPOLLPRI | EPOLLRDHUP)) { //文件可读,文件有紧急数据可读,对端关闭连接或者shutdown写入半连接
-                if( curFd == serverFd)
-                    handleConn(curFd);
+                if( fd == serverFd)
+                    handleConn(fd);
                 else
-                    handleRead(curFd);
+                    handleRead(fd);
             }
             if (event & EPOLLOUT) {  //文件可写
-                handleWrite(curFd);
+                handleWrite(fd);
             }
         }
     }
