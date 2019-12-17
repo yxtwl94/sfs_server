@@ -8,10 +8,8 @@ os:
 before_install:
   - chmod +x build.sh
 install:
-  - sudo apt-get update
-  - sudo apt-get dist-upgrade
   - sudo apt-get install cmake
-  - sudo apt-get install libboost-all-dev
+  - sudo apt-get install -f libboost-all-dev
 env:
   - BUILD_TYPE=debug
   - BUILD_TYPE=release
