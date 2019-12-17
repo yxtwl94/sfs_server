@@ -4,6 +4,7 @@
 #include <zconf.h>
 #include <cassert>
 #include <arpa/inet.h>
+#include <strings.h>
 
 #include "EventLoop.h"
 #include "Poller.h"
@@ -24,35 +25,37 @@ nio::EventLoop::EventLoop():
         t_loopInThisThread=this;
     }
 
-
 }
 
 void nio::EventLoop::handleConn(int fd) {
 
     char client_ip[INET_ADDRSTRLEN]=""; //客户端ip,最长16
     struct sockaddr_in client_addr{};
+    bzero((char *)&client_addr, sizeof(client_addr));
     socklen_t cliAddrLen = sizeof(client_addr);   // 必须初始化! 是16
 
     //获得一个已经建立的连接,在这之前阻塞
-    int conn_fd = accept(fd, (struct sockaddr*)&client_addr, &cliAddrLen);
-    if(conn_fd < 0) {
-        perror("accept error");
+    for(;;){
+
+        int conn_fd = accept(fd, (struct sockaddr*)&client_addr, &cliAddrLen);
+        if(conn_fd==-1) break; //fd is nonblocking
+
+        char greet[]="Hello! I'm a stupid Server\n";
+        send(conn_fd,greet,sizeof greet,0); //greeting
+
+        //add new connection Channel to Poller
+        nio::Channel::ChannelPtr curChannel(new nio::Channel());
+        curChannel->setFd(conn_fd);
+        curChannel->setEvent(EPOLLIN | EPOLLET);
+        poller_->epollAdd(curChannel);
+
+        // 打印客户端的 ip 和端口
+        inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
+        printf("--------------------------------------\n");
+        printf("new client ip=%s,port=%d,Fd=%d\n", client_ip,ntohs(client_addr.sin_port),conn_fd);
+        printf("--------------------------------------\n");
+
     }
-
-    char greet[]="Hello! I'm a stupid Server\n";
-    send(conn_fd,greet,sizeof greet,0); //greeting
-
-    //add new connection Channel to Poller
-    nio::Channel::ChannelPtr curChannel(new nio::Channel());
-    curChannel->setFd(conn_fd);
-    curChannel->setEvent(EPOLLIN | EPOLLET);
-    poller_->epollAdd(curChannel);
-
-    // 打印客户端的 ip 和端口
-    inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
-    printf("--------------------------------------\n");
-    printf("new client ip=%s,port=%d,Fd=%d\n", client_ip,ntohs(client_addr.sin_port),conn_fd);
-    printf("--------------------------------------\n");
 
 }
 
@@ -63,9 +66,8 @@ void nio::EventLoop::handleRead(int fd) {
     // 从client fd接收数据，写入
     ssize_t byte = buffer.readFromFd(fd);
     if(byte>0) {
-        std::string buf = buffer.readBuffer();
-        printf("[%d]received ", fd);  //不加'\n'无法输出，呵呵
-        std::cout << buf << std::endl;
+        std::string buf = buffer.getBuffer();
+        printf("[%d]received %s\n", fd, buf.c_str());  //不加'\n'无法输出，呵呵
     }
     else if(byte==0){
         //epoll del

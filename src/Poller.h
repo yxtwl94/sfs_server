@@ -29,7 +29,7 @@ namespace nio{
 
     private:
         std::vector<struct epoll_event> events_;  //events数组，用于传递给epollwait
-        std::map<int, nio::Channel::ChannelPtr> channelMap_; //事件表
+        std::map<int, nio::Channel::ChannelPtr> channelMap_; //事件表,　底层红黑数
         int epollFd_;
     };
 

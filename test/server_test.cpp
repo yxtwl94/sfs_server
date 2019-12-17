@@ -5,11 +5,10 @@
 #include <getopt.h>
 
 #include "src/Server.h"
-#include "src/EventLoop.h"
 
 int main(int argc, char *argv[]) {
 
-    int threadNum=100; //default
+    int threadNum=1000; //default
     int port=8000;
 
     int opt;

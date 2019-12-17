@@ -76,7 +76,7 @@ public:
     };
 
     ssize_t readFromFd(int fd);
-    std::string readBuffer();
+    std::string getBuffer();
 
 private:
 

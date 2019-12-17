@@ -57,7 +57,7 @@ ssize_t RingBuffer::readFromFd(int fd) {
     return n;
 }
 
-std::string RingBuffer::readBuffer() {
+std::string RingBuffer::getBuffer() {
 
     std::string temp;
     for(size_t i=readIndex_+1;;++i){

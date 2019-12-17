@@ -66,11 +66,11 @@ nio::Channel::ChannelList nio::Poller::poll() {
         nio::Channel::ChannelPtr cur_chanel = channelMap_[fd];
         if(cur_chanel){
             cur_chanel->setEvent(event);    //将发生事件的Channel加进去,每个Channel有独立的Fd
+            chanList.emplace_back(cur_chanel);
         }
-        chanList.emplace_back(cur_chanel);
     }
-    return chanList;
 
+    return chanList;
 }
 
 nio::Poller::~Poller() {

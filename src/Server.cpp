@@ -5,10 +5,10 @@
 #include <zconf.h>
 #include <arpa/inet.h>
 #include <strings.h>
+#include <fcntl.h>
 
 #include "src/ThreadPool.h"
 #include "src/Server.h"
-#include "src/RingBuffer.h"
 
 nio::Server::Server(int port):
                 serverLoop_(new nio::EventLoop()),
@@ -81,7 +81,10 @@ void nio::Server::start() {
         close(listen_fd_);
         return;
     }
-
+    if(setNonBlocking(listen_fd_)<0){
+        perror("setNonBlocking error");
+        return;
+    }
     //-------------------------------------------------------------------------------//
     printf("Server Started with fd %d!\n",listen_fd_);
 
@@ -120,6 +123,16 @@ void nio::Server::start() {
         }
     }
      */
+}
+
+int nio::Server::setNonBlocking(int fd) {
+
+    int flag = fcntl(fd, F_GETFL, 0);
+    if (flag == -1) return -1;
+
+    flag |= O_NONBLOCK;
+    if (fcntl(fd, F_SETFL, flag) == -1) return -1;
+    return 0;
 }
 
 nio::Server::~Server() {

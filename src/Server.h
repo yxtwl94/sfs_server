@@ -19,6 +19,7 @@ namespace nio {
         void setThreadPoolN(size_t n);
         explicit Server(int port); //防止隐式转换,类的转换必须显式
         void start();
+        int setNonBlocking(int fd);
 
         static void handler(int arg);
         ~Server();
