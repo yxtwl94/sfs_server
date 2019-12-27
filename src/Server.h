@@ -19,9 +19,11 @@ namespace nio {
         void setThreadPoolN(size_t n);
         explicit Server(int port); //防止隐式转换,类的转换必须显式
         void start();
+        void ConnHandler();
+        void ReadHandler(int connFd);
         int setNonBlocking(int fd);
 
-        static void handler(int arg);
+        //static void handler(int arg);
         ~Server();
 
     private:
@@ -30,7 +32,6 @@ namespace nio {
         size_t threadNum_;
         int port_;
         int listen_fd_;
-        int conn_fd_;
         struct sockaddr_in server_addr_;
         struct sockaddr_in client_addr_; // 用于保存客户端地址
     };

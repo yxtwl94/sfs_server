@@ -31,7 +31,7 @@ ssize_t RingBuffer::readFromFd(int fd) {
     iov[1].iov_len = writeBytesL;
 
     if(writeBytesR==0 && writeBytesL==0){
-        fprintf(stderr,"buffer full error\n");
+        fprintf(stderr,"[RingBuffer]buffer full error");
     }
 
     const ssize_t n=readv(fd,iov,2);
@@ -39,7 +39,7 @@ ssize_t RingBuffer::readFromFd(int fd) {
     //printf("right %zu,left %zu\n",writeBytesR,writeBytesL);
 
     if(n<0){
-        perror("read error\n");
+        //perror("[RingBuffer]read error");
     }
     else if (boost::implicit_cast<size_t>(n) <= writeBytesR+writeBytesL) {  //隐式转换　ssize_t->size_t,当空闲write空间足够时
         if(writeIndex_+n<=buf_.size()-1)

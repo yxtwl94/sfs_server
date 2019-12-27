@@ -11,11 +11,21 @@ add_library(${PROJECT_NAME}
         src/RingBuffer.cpp
         src/Channel.cpp
         src/EventLoop.cpp
-        src/Poller.cpp)
+        src/Poller.cpp
+        src/client.cpp
+        src/EventloopThread.cpp)
 
 link_libraries(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
-add_executable(test_node
+add_executable(server_node
         test/server_test.cpp
+        )
+
+add_executable(demo
+        test/DEMO.cpp
+        )
+
+add_executable(client_node
+        test/client_test.cpp
         )

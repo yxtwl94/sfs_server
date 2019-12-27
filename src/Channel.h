@@ -17,7 +17,9 @@ namespace nio {
     class Channel {
 
     public:
+
         typedef std::shared_ptr<nio::Channel> ChannelPtr;
+        typedef std::function<void()> CallBack;
         typedef std::vector<ChannelPtr> ChannelList; //事件指针数组类型
 
         Channel();
@@ -28,12 +30,20 @@ namespace nio {
 
         void setEvent(__uint32_t event) { event_ = event; };
 
+        void setConnHandler(CallBack &&readHandler) { readHandler_ = readHandler; }
+
+        void setReadHandler(CallBack &&connHandler) { connHandler_ = connHandler; }
+
+        void startHandling();
+
         __uint32_t getEvent() { return event_; }
 
         ~Channel();
 
 
     private:
+        CallBack readHandler_;
+        CallBack connHandler_;
         int fd_;
         __uint32_t event_;
 

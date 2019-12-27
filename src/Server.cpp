@@ -5,20 +5,21 @@
 #include <zconf.h>
 #include <arpa/inet.h>
 #include <strings.h>
+#include <functional>
 #include <fcntl.h>
 
 #include "src/ThreadPool.h"
 #include "src/Server.h"
+#include "RingBuffer.h"
 
 nio::Server::Server(int port):
                 serverLoop_(new nio::EventLoop()),
                 serverChannel_(new nio::Channel()),
                 threadNum_(0),
                 port_(port),
-                server_addr_(),
-                client_addr_(),
                 listen_fd_(0),
-                conn_fd_(0) {
+                server_addr_(),
+                client_addr_(){
 
     if(port<1024 || port>65535) {
         fprintf(stderr,"port: %d isn't correct!\n", port);
@@ -92,38 +93,84 @@ void nio::Server::start() {
 
     serverChannel_->setEvent(EPOLLIN | EPOLLET);
     serverChannel_->setFd(listen_fd_);
+    serverChannel_->setConnHandler(std::bind(&nio::Server::ConnHandler,this));
 
     serverLoop_->addToPoller(serverChannel_);
-    serverLoop_->loop(listen_fd_);
+    serverLoop_->loop();
 
-    /*
-    for (;;) {
-        char client_ip[INET_ADDRSTRLEN]=""; //客户端ip,最长16
-        socklen_t cliAddrLen = sizeof(client_addr_);   // 必须初始化! 是16
+}
 
-        //获得一个已经建立的连接,在这之前阻塞
-        conn_fd_ = accept(listen_fd_, (struct sockaddr*)&client_addr_, &cliAddrLen);
-        if(conn_fd_ < 0) {
-            perror("accept error");
-            continue;
+void nio::Server::ConnHandler(){
+
+    char client_ip[INET_ADDRSTRLEN]=""; //客户端ip,最长16
+    struct sockaddr_in client_addr{0};
+    bzero((char *)&client_addr, sizeof(client_addr));
+    socklen_t cliAddrLen = sizeof(client_addr);   // 必须初始化! 是16
+
+    //边缘触发，要循环
+    for(;;){
+
+        int conn_fd = accept(listen_fd_, (struct sockaddr*)&client_addr, &cliAddrLen);
+        if(conn_fd==-1){
+            //perror("accept error");
+            break;
+        } //server fd is nonblocking
+
+        //new conn_fd is nonBlocking
+        if(nio::Server::setNonBlocking(conn_fd)<0){
+            perror("set nonBlocking error");
+            return;
         }
+
+        //char greet[]="Hello! I'm a stupid Server\n";
+        //send(conn_fd,greet,sizeof greet,0); //greeting
+        //add new connection Channel to Poller
+        //add new connection Channel to Poller
+        nio::Channel::ChannelPtr curChannel(new nio::Channel());
+        curChannel->setFd(conn_fd);
+        curChannel->setEvent(EPOLLIN | EPOLLET);
+        curChannel->setReadHandler(std::bind(&nio::Server::ReadHandler, this, conn_fd));
+        serverLoop_->addToPoller(curChannel);
 
         // 打印客户端的 ip 和端口
-        inet_ntop(AF_INET, &client_addr_.sin_addr, client_ip, INET_ADDRSTRLEN);
-        printf("--------------------------------------\n");
-        printf("new client ip=%s,port=%d\n", client_ip,ntohs(client_addr_.sin_port));
-        std::cout<<"start Thread with conn_fd "<<conn_fd_<<std::endl;
-        printf("--------------------------------------\n");
+        inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
+        //printf("--------------------------------------\n");
+        printf("new client ip=%s,port=%d,Fd=%d\n", client_ip,ntohs(client_addr.sin_port),conn_fd);
+        //printf("--------------------------------------\n");
 
-        if(conn_fd_ > 0) {
+    }
 
-            threadPool.enqueue(std::bind(&Server::handler,conn_fd_));
-            //std::thread serverThread(handler,conn_fd_);
-            //serverThread.detach(); //不用等线程,直接返回处理下一个连接
+}
+
+void nio::Server::ReadHandler(int connFd) {
+    int done=0;
+    for(;;){
+        RingBuffer buffer;
+        // 从client fd接收数据，写入
+        ssize_t byte = buffer.readFromFd(connFd);
+        if(byte>0) {
+            std::string buf = buffer.getBuffer();
+            printf("[%d]received %s\n", connFd, buf.c_str());  //不加'\n'无法输出，呵呵
+        }
+        if (byte==-1) {
+            if (EAGAIN != errno) {
+                perror ("[EventLoop]Read data");
+                done = 1;
+            }
+            break;
+        }
+        else if (byte==0) {
+            done = 1;
+            break;
         }
     }
-     */
+    if(done==1){
+        printf("[%d]client closed!\n", connFd);
+        close(connFd);	//关闭已连接套接字
+
+    }
 }
+
 
 int nio::Server::setNonBlocking(int fd) {
 
@@ -139,3 +186,5 @@ nio::Server::~Server() {
     close(listen_fd_);
     std::cout<<"Server stopped"<<std::endl;
 }
+
+

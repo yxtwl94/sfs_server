@@ -7,21 +7,22 @@
 
 #include "Poller.h"
 
-const int EPOLLWAIT_TIMEOUT = 10000;  //epoll_wait 超时时间设置
-const int EVENTS_NUM = 4096;          //最大触发事件数量
+const int EPOLLWAIT_TIMEOUT = -1;  //epoll_wait 超时时间设置
+const int MAX_EVENT = 4096;          //最大触发事件数量
 
 nio::Poller::Poller():
             epollFd_(epoll_create1(EPOLL_CLOEXEC)),
-            events_(EVENTS_NUM){
+            events_(MAX_EVENT){
     //fd for epoll
-    assert(epollFd_>0);
+
+    assert(epollFd_>1);
 }
 
 void nio::Poller::epollAdd(const nio::Channel::ChannelPtr& channel) {
 
     int fd=channel->getFd();
+    struct epoll_event event{0};
 
-    struct epoll_event event{};
     event.data.fd = fd;
     event.events = channel->getEvent();
 
@@ -33,7 +34,7 @@ void nio::Poller::epollAdd(const nio::Channel::ChannelPtr& channel) {
     }
 }
 
-void nio::Poller::epollDel(const nio::Channel::ChannelPtr &channel) {
+void nio::Poller::epollDel(const nio::Channel::ChannelPtr& channel) {
 
     int fd=channel->getFd();
 
@@ -50,11 +51,9 @@ void nio::Poller::epollDel(const nio::Channel::ChannelPtr &channel) {
 
 nio::Channel::ChannelList nio::Poller::poll() {
 
-    int timeout = EPOLLWAIT_TIMEOUT;
-
-    nio::Channel::ChannelList chanList;
+    nio::Channel::ChannelList activeChanList;
     //监控epollFd结构体的事件并返回事件到events_
-    int nfds = epoll_wait(epollFd_, &*events_.begin(), events_.size(), timeout);
+    int nfds = epoll_wait(epollFd_, &*events_.begin(), MAX_EVENT, EPOLLWAIT_TIMEOUT);
     if(nfds < 0) {
         perror("ERROR: epoll wait");
     }
@@ -64,13 +63,14 @@ nio::Channel::ChannelList nio::Poller::poll() {
         int fd = events_[i].data.fd;
 
         nio::Channel::ChannelPtr cur_chanel = channelMap_[fd];
+
         if(cur_chanel){
             cur_chanel->setEvent(event);    //将发生事件的Channel加进去,每个Channel有独立的Fd
-            chanList.emplace_back(cur_chanel);
+            activeChanList.emplace_back(cur_chanel);
         }
     }
 
-    return chanList;
+    return activeChanList;
 }
 
 nio::Poller::~Poller() {

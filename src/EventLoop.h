@@ -23,21 +23,15 @@ namespace nio {
         EventLoop();
         ~EventLoop();
 
-        void handleRead(int fd);
-        void handleConn(int fd);
-        void handleWrite(int fd);
-
         void addToPoller(const nio::Channel::ChannelPtr& channel) {
             poller_->epollAdd(channel);
         }
 
-        void loop(int serverFd);
+        void loop();
 
     private:
-        bool looping_;
-        bool quit_;
+
         std::unique_ptr<nio::Poller> poller_;  //ChannelPtr poller
-        //std::shared_ptr<nio::Channel> thisChannel_;
     };
 
 }
