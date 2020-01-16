@@ -37,7 +37,7 @@ void nio::EventLoop::loop() {
             __uint32_t event=it->getEvent();
 
             if( event & EPOLLERR || event & EPOLLHUP || (! (event & EPOLLIN))){
-                //server文件上发上了一个错误
+                //server文件上发上了一个错误,对已关闭客户端写入等错误
                 nio::Channel::ChannelPtr curChannel(new nio::Channel());
                 curChannel->setFd(fd);
                 poller_->epollDel(curChannel);
@@ -47,7 +47,7 @@ void nio::EventLoop::loop() {
                 //return;
             }
             else if ((event & EPOLLIN) || (event & EPOLLPRI) || event & (EPOLLRDHUP)) {
-                //文件可读,文件有紧急数据可读,对端关闭连接或者shutdown写入半连接
+                //文件可读,文件有紧急数据可读,对端关闭连接或者shutdown
                 it->startHandling();
             }
             else if (event & EPOLLOUT) {  //文件可写

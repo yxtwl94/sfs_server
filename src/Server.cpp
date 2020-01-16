@@ -8,14 +8,13 @@
 #include <functional>
 #include <fcntl.h>
 
-#include "src/ThreadPool.h"
 #include "src/Server.h"
 #include "RingBuffer.h"
 
-nio::Server::Server(int port):
-                serverLoop_(new nio::EventLoop()),
+nio::Server::Server(EventLoop *serverLoop,int port,int threadNum):
+                serverLoop_(serverLoop),
                 serverChannel_(new nio::Channel()),
-                threadNum_(0),
+                eventLoopThreadPool_(new nio::EventLoopThreadPool(serverLoop,threadNum)),
                 port_(port),
                 listen_fd_(0),
                 server_addr_(),
@@ -25,31 +24,15 @@ nio::Server::Server(int port):
         fprintf(stderr,"port: %d isn't correct!\n", port);
         return;
     }
-    bzero((char *)&server_addr_, sizeof(server_addr_)); //数据初始化--清零
 
+    bzero((char *)&server_addr_, sizeof(server_addr_)); //数据初始化--清零
     server_addr_.sin_family=AF_INET;
     server_addr_.sin_addr.s_addr=htonl(INADDR_ANY);
     server_addr_.sin_port=htons((unsigned short)port);
 
 }
 
-
-void nio::Server::setThreadPoolN(size_t n) {
-    if(n<=0){
-        fprintf(stderr,"number of threads in pool must be positive");
-        return;
-    }
-    threadNum_=n;
-
-}
-
 void nio::Server::start() {
-    //建立线程池
-    if(threadNum_<=0){
-        fprintf(stderr,"you must set number of threads in ThreadPool");
-        return;
-    }
-    ThreadPool threadPool(threadNum_);
 
     /*创建服务器端套接字--IPv4协议，面向连接通信，TCP协议*/
     if((listen_fd_=socket(AF_INET,SOCK_STREAM,0))<0) {
@@ -90,6 +73,7 @@ void nio::Server::start() {
     printf("Server Started with fd %d!\n",listen_fd_);
 
     printf("======waiting for client's request======\n");
+    //eventLoopThreadPool_->start();
 
     serverChannel_->setEvent(EPOLLIN | EPOLLET);
     serverChannel_->setFd(listen_fd_);
@@ -100,6 +84,7 @@ void nio::Server::start() {
 
 }
 
+//some handlers used by channel
 void nio::Server::ConnHandler(){
 
     char client_ip[INET_ADDRSTRLEN]=""; //客户端ip,最长16
@@ -110,21 +95,22 @@ void nio::Server::ConnHandler(){
     //边缘触发，要循环
     for(;;){
 
-        int conn_fd = accept(listen_fd_, (struct sockaddr*)&client_addr, &cliAddrLen);
+        int conn_fd=accept(listen_fd_,(struct sockaddr *)&client_addr,&cliAddrLen);
         if(conn_fd==-1){
-            //perror("accept error");
             break;
-        } //server fd is nonblocking
-
+        }
+        
         //new conn_fd is nonBlocking
         if(nio::Server::setNonBlocking(conn_fd)<0){
             perror("set nonBlocking error");
             return;
         }
-
         //char greet[]="Hello! I'm a stupid Server\n";
         //send(conn_fd,greet,sizeof greet,0); //greeting
-        //add new connection Channel to Poller
+
+        //nio::EventLoop *curLoop=eventLoopThreadPool_->nextLoop();
+
+
         //add new connection Channel to Poller
         nio::Channel::ChannelPtr curChannel(new nio::Channel());
         curChannel->setFd(conn_fd);
@@ -134,9 +120,7 @@ void nio::Server::ConnHandler(){
 
         // 打印客户端的 ip 和端口
         inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
-        //printf("--------------------------------------\n");
         printf("new client ip=%s,port=%d,Fd=%d\n", client_ip,ntohs(client_addr.sin_port),conn_fd);
-        //printf("--------------------------------------\n");
 
     }
 

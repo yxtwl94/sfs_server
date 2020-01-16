@@ -13,17 +13,15 @@ add_library(${PROJECT_NAME}
         src/EventLoop.cpp
         src/Poller.cpp
         src/client.cpp
-        src/EventloopThread.cpp)
+        src/EventLoopThread.cpp
+        src/EventLoopThreadPool.cpp
+        )
 
 link_libraries(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 add_executable(server_node
         test/server_test.cpp
-        )
-
-add_executable(demo
-        test/DEMO.cpp
         )
 
 add_executable(client_node

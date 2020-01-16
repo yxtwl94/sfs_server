@@ -28,10 +28,10 @@ int main(int argc, char *argv[]) {
             default: break;
         }
     }
-    nio::Server server(port);
+    nio::EventLoop serverLoop;
+    nio::Server server(&serverLoop,port,threadNum);
     printf("Testing Server with port %d\n",port);
 
-    server.setThreadPoolN(threadNum);
     server.start();
 
     return 0;

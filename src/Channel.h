@@ -30,9 +30,11 @@ namespace nio {
 
         void setEvent(__uint32_t event) { event_ = event; };
 
-        void setConnHandler(CallBack &&readHandler) { readHandler_ = readHandler; }
+        void setConnHandler(CallBack &&connHandler) { connHandler_ = connHandler; }
 
-        void setReadHandler(CallBack &&connHandler) { connHandler_ = connHandler; }
+        void setReadHandler(CallBack &&readHandler) { readHandler_ = readHandler; }
+
+        void setWriteHandler(CallBack &&writeHandler) { connHandler_ = writeHandler; }
 
         void startHandling();
 
@@ -44,6 +46,7 @@ namespace nio {
     private:
         CallBack readHandler_;
         CallBack connHandler_;
+        CallBack writeHandler_;
         int fd_;
         __uint32_t event_;
 

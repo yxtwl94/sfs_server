@@ -15,6 +15,7 @@ nio::Channel::Channel():
 void nio::Channel::startHandling() {
     if(readHandler_) readHandler_();
     if(connHandler_) connHandler_();
+    if(writeHandler_) writeHandler_();
 }
 
 

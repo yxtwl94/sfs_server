@@ -12,14 +12,12 @@
 
 namespace nio {
 
-    class EventloopThread{
+    class EventLoopThread{
 
     public:
-        EventloopThread();
-
-        nio::EventLoop *startLoop();
-
-        ~EventloopThread();
+        EventLoopThread();
+        EventLoop* startLoop();
+        ~EventLoopThread();
 
     private:
         void threadFunc();

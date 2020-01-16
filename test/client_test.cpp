@@ -4,7 +4,7 @@
 #include <thread>
 
 #define SERVER_IP "127.0.0.1"
-#define N 100
+#define N 2000
 using namespace std;
 
 void handle(int j){
@@ -16,20 +16,6 @@ void handle(int j){
 
 }
 int main(int argc, char **argv){
-
-//    for(int i=0;i<N;++i){
-//        int pid=fork();
-//        if(pid==-1){
-//            perror("process error");
-//            return 0;
-//        }
-//        else if(pid==0){
-//            printf("[%d]child\n",i);
-//        }
-//        else{
-//            printf("[%d]father\n",i);
-//        }
-//    }
 
     std::thread ThreadName[N];
     for (int j = 0; j < N; ++j) {
