@@ -7,8 +7,8 @@
 #include "EventLoopThreadPool.h"
 
 
-nio::EventLoopThreadPool::EventLoopThreadPool(nio::EventLoop *baseLoop, int numThreads)
-:baseLoop_(baseLoop), numThreads_(numThreads) ,started_(false) {
+nio::EventLoopThreadPool::EventLoopThreadPool(nio::EventLoop *baseLoop, int numThreads):
+                                baseLoop_(baseLoop), numThreads_(numThreads) ,started_(false) {
     //LOG some
     if(numThreads<=0) abort();
 }

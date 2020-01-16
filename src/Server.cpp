@@ -73,7 +73,7 @@ void nio::Server::start() {
     printf("Server Started with fd %d!\n",listen_fd_);
 
     printf("======waiting for client's request======\n");
-    //eventLoopThreadPool_->start();
+    eventLoopThreadPool_->start();
 
     serverChannel_->setEvent(EPOLLIN | EPOLLET);
     serverChannel_->setFd(listen_fd_);
@@ -108,7 +108,7 @@ void nio::Server::ConnHandler(){
         //char greet[]="Hello! I'm a stupid Server\n";
         //send(conn_fd,greet,sizeof greet,0); //greeting
 
-        //nio::EventLoop *curLoop=eventLoopThreadPool_->nextLoop();
+        nio::EventLoop *curLoop=eventLoopThreadPool_->nextLoop();
 
 
         //add new connection Channel to Poller
