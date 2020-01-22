@@ -18,9 +18,10 @@ void nio::EventLoopThreadPool::start() {
 
     started_=true;
     for(int i=0;i<numThreads_;++i){
-        std::shared_ptr<nio::EventLoopThread> t(new nio::EventLoopThread());
-        threads_.emplace_back(t);
-        loops_.emplace_back(t->startLoop());
+        //create threads and Loops
+        EventLoopThread* t = new EventLoopThread();
+        threads_.emplace_back(std::unique_ptr<nio::EventLoopThread>(t));
+        loops_.emplace_back(t->threadLoop());
     }
 }
 
@@ -28,10 +29,14 @@ nio::EventLoop *nio::EventLoopThreadPool::nextLoop() {
     assert(started_);
     nio::EventLoop *loop = baseLoop_;
     if(!loops_.empty()){
+        //printf("eventloop pool num is %d\n",loops_.size());
         loop=loops_[next_];
         next_=(next_+1)%numThreads_;
     }
     return loop;
 }
 
-nio::EventLoopThreadPool::~EventLoopThreadPool() = default;
+nio::EventLoopThreadPool::~EventLoopThreadPool() {
+
+    //loop is in stack don not need to delete
+}

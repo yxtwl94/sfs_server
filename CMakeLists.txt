@@ -12,7 +12,6 @@ add_library(${PROJECT_NAME}
         src/Channel.cpp
         src/EventLoop.cpp
         src/Poller.cpp
-        src/client.cpp
         src/EventLoopThread.cpp
         src/EventLoopThreadPool.cpp
         )
@@ -22,8 +21,4 @@ target_link_libraries(${PROJECT_NAME} Threads::Threads)
 
 add_executable(server_node
         test/server_test.cpp
-        )
-
-add_executable(client_node
-        test/client_test.cpp
         )

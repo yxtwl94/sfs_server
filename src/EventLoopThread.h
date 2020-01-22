@@ -7,6 +7,7 @@
 
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 
 #include "src/EventLoop.h"
 
@@ -16,7 +17,7 @@ namespace nio {
 
     public:
         EventLoopThread();
-        EventLoop* startLoop();
+        EventLoop* threadLoop();
         ~EventLoopThread();
 
     private:
@@ -24,6 +25,7 @@ namespace nio {
         std::thread thread_;
         nio::EventLoop *loop_;
         std::mutex mutex_;
+        std::condition_variable cond_;
     };
 
 }

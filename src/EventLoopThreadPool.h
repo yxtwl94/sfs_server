@@ -25,8 +25,8 @@ namespace nio {
         int numThreads_;
         int next_;
         bool started_;
-        std::vector<std::shared_ptr<nio::EventLoopThread>> threads_;
-        std::vector<nio::EventLoop*> loops_;
+        std::vector<std::unique_ptr<nio::EventLoopThread>> threads_;
+        std::vector<EventLoop*> loops_;
 
     };
 }

@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[]) {
 
-    int threadNum=1000; //default
+    int threadNum=5; //default
     int port=8000;
 
     int opt;
@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
     }
     nio::EventLoop serverLoop;
     nio::Server server(&serverLoop,port,threadNum);
+
     printf("Testing Server with port %d\n",port);
 
     server.start();

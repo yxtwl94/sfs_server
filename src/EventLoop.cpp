@@ -11,6 +11,7 @@ __thread nio::EventLoop* t_loopInThisThread = nullptr;
 
 
 nio::EventLoop::EventLoop():
+                loopId_(getTid()),
                 poller_(new nio::Poller()) {
 
     if(t_loopInThisThread){
@@ -19,7 +20,6 @@ nio::EventLoop::EventLoop():
     else{
         t_loopInThisThread=this;
     }
-
 }
 
 void nio::EventLoop::loop() {

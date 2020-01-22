@@ -7,10 +7,14 @@
 
 #include <functional>
 #include <memory>
+#include <thread>
+#include <unistd.h>
+#include <sys/syscall.h>
 
 #include "Channel.h"
 #include "Poller.h"
 
+#define getTid() syscall(SYS_gettid)
 
 namespace nio {
 
@@ -28,9 +32,10 @@ namespace nio {
         }
 
         void loop();
+        int getLoopId() {return loopId_; };
 
     private:
-
+        const int loopId_;
         std::unique_ptr<nio::Poller> poller_;  //ChannelPtr poller
     };
 

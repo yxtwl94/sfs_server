@@ -70,7 +70,7 @@ void nio::Server::start() {
         return;
     }
     //-------------------------------------------------------------------------------//
-    printf("Server Started with fd %d!\n",listen_fd_);
+    printf("[%d]Server Started with tid %d!\n",listen_fd_,serverLoop_->getLoopId());
 
     printf("======waiting for client's request======\n");
     eventLoopThreadPool_->start();
@@ -81,7 +81,6 @@ void nio::Server::start() {
 
     serverLoop_->addToPoller(serverChannel_);
     serverLoop_->loop();
-
 }
 
 //some handlers used by channel
@@ -110,17 +109,17 @@ void nio::Server::ConnHandler(){
 
         nio::EventLoop *curLoop=eventLoopThreadPool_->nextLoop();
 
-
         //add new connection Channel to Poller
         nio::Channel::ChannelPtr curChannel(new nio::Channel());
         curChannel->setFd(conn_fd);
         curChannel->setEvent(EPOLLIN | EPOLLET);
         curChannel->setReadHandler(std::bind(&nio::Server::ReadHandler, this, conn_fd));
-        serverLoop_->addToPoller(curChannel);
+        curLoop->addToPoller(curChannel);
 
         // 打印客户端的 ip 和端口
         inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
-        printf("new client ip=%s,port=%d,Fd=%d\n", client_ip,ntohs(client_addr.sin_port),conn_fd);
+        printf("[%d]new client ip=%s,port=%d,tid=%d\n",
+               conn_fd,client_ip,ntohs(client_addr.sin_port),curLoop->getLoopId());
 
     }
 

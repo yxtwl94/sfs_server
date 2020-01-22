@@ -18,7 +18,7 @@ namespace nio {
 
     public:
 
-        typedef std::shared_ptr<nio::Channel> ChannelPtr;
+        typedef std::shared_ptr<Channel> ChannelPtr;
         typedef std::function<void()> CallBack;
         typedef std::vector<ChannelPtr> ChannelList; //事件指针数组类型
 
